@@ -1,6 +1,6 @@
 <?php
 
-    $fileToParse = file_get_contents("output.txt");
+    $fileToParse = file_get_contents("output2.txt");
 
     $fileName = $str = strtok($fileToParse, "\n");
 
@@ -27,6 +27,9 @@
 
             $match = [];
 
+            $matched = preg_match("/$cpuTimeRegex/", $fileToParseArray[$i+1], $match);
+            $newInstance['cpuTime'] = $match[1];
+
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
             $newInstance['restarts'] = $match[1];
 
@@ -45,12 +48,11 @@
 
             // Next index
             // ============= 
-            $matched = preg_match("/$cpuTimeRegex/", $fileToParseArray[$i+1], $match);
-            $newInstance['cpuTime'] = $match[1];
-
+            /*
             if ( preg_match ('/(INDETERMINATE|UNSATISFIABLE|SATISFIABLE)/', $fileToParseArray[$i+1], $match) ) {
                 $newInstance['status'] = $match[1]; 
             }
+            */
         } else {
             $skipped++;
         }
@@ -63,6 +65,15 @@
         }
     //    exit;
     }
+
+    $fp = fopen("output2.csv", 'w');
+    fputcsv($fp, array_keys($allProcessed[0]));
+
+    foreach ($allProcessed as $fields) {
+        fputcsv($fp, $fields);
+    }
+
+    fclose($fp);
 
     print_r($allProcessed);
 
