@@ -27,9 +27,27 @@
             $matched = preg_match("/$cpuTimeRegex/", $fileToParseArray[$i+1], $match);
             $newInstance['cpuTime'] = $match[1];
 
+            // Might be redundant, but whatever
             if ( $i%2==1 ) {
                 $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
-                $newInstance['fileName'] = $match[1];
+                $fileName = $match[1];
+
+                $output = shell_exec("/u4/a9palmer/maple_sat_output_parser/SAT-features-competition2012/featuresSAT12 ~/Agile/{$fileName} | tail -2");
+
+                $arr = explode("\n", $output);
+
+                $headers = explode(",",$arr[0]);
+                $vals = explode(",",$arr[1]);
+
+                $mapping = [];
+
+                foreach($headers as $key => $val) {
+                    $mapping[$val] = $vals[$key];
+                }
+
+                $newInstance = array_merge($newInstance, $mapping);
+                //print_r($newInstance); exit;
+
             }
 
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
@@ -61,14 +79,13 @@
 
         $i +=2;
 
-        //print_r($newInstance);
         if (!empty($newInstance)) {
+            print_r($newInstance);
             $allProcessed[] = $newInstance;
         }
-    //    exit;
     }
 
-    $fp = fopen("output2.csv", 'w');
+    $fp = fopen("test_3.csv", 'w');
     fputcsv($fp, array_keys($allProcessed[0]));
 
     foreach ($allProcessed as $fields) {
@@ -76,8 +93,6 @@
     }
 
     fclose($fp);
-
-    print_r($allProcessed);
 
     echo "Total processed: " . count($allProcessed) . PHP_EOL;
     echo "Skipped: $skipped" . PHP_EOL;
