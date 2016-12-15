@@ -1,13 +1,10 @@
 <?php
 
-    $fileToParse = file_get_contents("output2.txt");
-
-    $fileName = $str = strtok($fileToParse, "\n");
+    $fileToParse = file_get_contents("output3.txt");
 
     $fileToParseArray = explode('============================[ Problem Statistics ]=============================', $fileToParse);
 
-    unset($fileToParseArray[0]);
-
+    $fileNameRegex = '.*\/(.*cnf)';
     $restartRegex = 'restarts.* (\d+)';
     $conflictRegex = 'conflicts.* (\d+)';
     $decisionsRegex = 'decisions.* (\d+)';
@@ -29,6 +26,11 @@
 
             $matched = preg_match("/$cpuTimeRegex/", $fileToParseArray[$i+1], $match);
             $newInstance['cpuTime'] = $match[1];
+
+            if ( $i%2==1 ) {
+                $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
+                $newInstance['fileName'] = $match[1];
+            }
 
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
             $newInstance['restarts'] = $match[1];
