@@ -1,1 +1,1 @@
-Usage: php parser.php --in in.txt --out out.csv
+Usage: `php parser.php --in in.txt --out out.csv`
