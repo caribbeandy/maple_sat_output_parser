@@ -26,11 +26,11 @@
     $skipped = 0;
     $allProcessed = [];
 
-    for($i=1; $i<count($fileToParseArray);$i +=2) {
+    for($i=1; $i<count($fileToParseArray);$i+=2) {
 
         $newInstance = [];
 
-        if ( preg_match ('/INDETERMINATE/', $fileToParseArray[$i]) ) {
+        if ( isset($fileToParseArray[$i+1]) && preg_match ('/INDETERMINATE/', $fileToParseArray[$i]) ) {
 
             $match = [];
 
@@ -52,26 +52,24 @@
             $matched = preg_match("/$conflictLiteralsRegex/", $fileToParseArray[$i], $match);
             $newInstance['conflictLiterals'] = $match[1];
 
-            // Might be redundant, but whatever
-            if ( $i%2==1 ) {
-                $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
-                $fileName = $match[1];
+            // Merge with SATZilla features
+            $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
+            $fileName = $match[1];
 
-                $output = shell_exec("cat out/{$fileName} | tail -2");
+            $output = shell_exec("cat sat_2016_agile_processed/{$fileName} | tail -2");
 
-                $arr = explode("\n", $output);
+            $arr = explode("\n", $output);
 
-                $headers = explode(",",$arr[0]);
-                $vals = explode(",",$arr[1]);
+            $headers = explode(",",$arr[0]);
+            $vals = explode(",",$arr[1]);
 
-                $mapping = [];
+            $mapping = [];
 
-                foreach($headers as $key => $val) {
-                    $mapping[$val] = $vals[$key];
-                }
-
-                $newInstance = array_merge($newInstance, $mapping);
+            foreach($headers as $key => $val) {
+                $mapping[$val] = $vals[$key];
             }
+
+            $newInstance = array_merge($newInstance, $mapping);
 
             //print_r($newInstance); exit;
 
