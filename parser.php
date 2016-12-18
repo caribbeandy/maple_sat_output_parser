@@ -45,9 +45,8 @@
                     $mapping[$val] = $vals[$key];
                 }
 
-                $newInstance = array_merge($newInstance, $mapping);
+                $newInstance = array_merge($mapping, $newInstance);
                 //print_r($newInstance); exit;
-
             }
 
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
