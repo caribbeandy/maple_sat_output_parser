@@ -1,19 +1,29 @@
 <?php
 
-    $fileToParse = file_get_contents("output3.txt");
+    // Input/output //
+    $options = getopt("", ['in:','out:']);
 
-    $fileToParseArray = explode('============================[ Problem Statistics ]=============================', $fileToParse);
+    if ( empty($options['in']) || empty($options['out'])) {
+        echo "Enter input and output args" . PHP_EOL;
+        echo "e.g. php parser.php --in in.txt --out out.csv" . PHP_EOL;
+        exit;
+    }
 
+    $fileToParse = $options['in'];
+    $outputFile = $options['out'];
+
+    $fileToParseArray = explode('============================[ Problem Statistics ]=============================', file_get_contents($fileToParse));
+
+    /** Regexes */
     $fileNameRegex = '.*\/(.*cnf)';
     $restartRegex = 'restarts.* (\d+)';
     $conflictRegex = 'conflicts.* (\d+)';
     $decisionsRegex = 'decisions.* (\d+)';
     $propagationsRegex = 'propagations.* (\d+)';
     $conflictLiteralsRegex = 'conflict literals.* (\d+)';
-
     $cpuTimeRegex = 'CPU time.* (\d+\.\d+)';
-    $skipped = 0;
 
+    $skipped = 0;
     $allProcessed = [];
 
     for($i=1; $i<count($fileToParseArray);) {
@@ -32,7 +42,7 @@
                 $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
                 $fileName = $match[1];
 
-                $output = shell_exec("/u4/a9palmer/maple_sat_output_parser/SAT-features-competition2012/featuresSAT12 ~/Agile/{$fileName} | tail -2");
+                $output = shell_exec("cat out/{$fileName} | tail -2");
 
                 $arr = explode("\n", $output);
 
@@ -45,8 +55,7 @@
                     $mapping[$val] = $vals[$key];
                 }
 
-                $newInstance = array_merge($mapping, $newInstance);
-                //print_r($newInstance); exit;
+                $newInstance = array_merge($newInstance, $mapping);
             }
 
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
@@ -64,6 +73,7 @@
             $matched = preg_match("/$conflictLiteralsRegex/", $fileToParseArray[$i], $match);
             $newInstance['conflictLiterals'] = $match[1];
 
+            //print_r($newInstance); exit;
 
             // Next index
             // ============= 
@@ -79,12 +89,13 @@
         $i +=2;
 
         if (!empty($newInstance)) {
-            print_r($newInstance);
+            //print_r($newInstance);
             $allProcessed[] = $newInstance;
         }
     }
 
-    $fp = fopen("test_3.csv", 'w');
+    // Output stuff
+    $fp = fopen($outputFile, 'w');
     fputcsv($fp, array_keys($allProcessed[0]));
 
     foreach ($allProcessed as $fields) {
@@ -93,5 +104,6 @@
 
     fclose($fp);
 
+    // Stats
     echo "Total processed: " . count($allProcessed) . PHP_EOL;
     echo "Skipped: $skipped" . PHP_EOL;
