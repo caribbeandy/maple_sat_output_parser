@@ -1,12 +1,18 @@
 <?php
 
     // Input/output //
-    $options = getopt("", ['in:','out:']);
+    $options = getopt("d", ['in:','out:']);
 
     if ( empty($options['in']) || empty($options['out'])) {
         echo "Enter input and output args" . PHP_EOL;
         echo "e.g. php parser.php --in in.txt --out out.csv" . PHP_EOL;
         exit;
+    }
+
+    $dynamicOnly = false;
+
+    if ( isset($options['d']) ) {
+        $dynamicOnly = true;
     }
 
     $fileToParse = $options['in'];
@@ -52,24 +58,26 @@
             $matched = preg_match("/$conflictLiteralsRegex/", $fileToParseArray[$i], $match);
             $newInstance['conflictLiterals'] = $match[1];
 
-            // Merge with SATZilla features
-            $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
-            $fileName = $match[1];
+            if ( !$dynamicOnly ) {
+                // Merge with SATZilla features
+                $matched = preg_match("/$fileNameRegex/", $fileToParseArray[$i-1], $match);
+                $fileName = $match[1];
 
-            $output = shell_exec("cat sat_2016_agile_processed/{$fileName} | tail -2");
+                $output = shell_exec("cat sat_2016_agile_processed/{$fileName} | tail -2");
 
-            $arr = explode("\n", $output);
+                $arr = explode("\n", $output);
 
-            $headers = explode(",",$arr[0]);
-            $vals = explode(",",$arr[1]);
+                $headers = explode(",",$arr[0]);
+                $vals = explode(",",$arr[1]);
 
-            $mapping = [];
+                $mapping = [];
 
-            foreach($headers as $key => $val) {
-                $mapping[$val] = $vals[$key];
+                foreach($headers as $key => $val) {
+                    $mapping[$val] = $vals[$key];
+                }
+
+                $newInstance = array_merge($newInstance, $mapping);
             }
-
-            $newInstance = array_merge($newInstance, $mapping);
 
             //print_r($newInstance); exit;
 
