@@ -21,8 +21,8 @@
     $decisionsRegex = 'decisions.* (\d+)';
     $propagationsRegex = 'propagations.* (\d+)';
     $conflictLiteralsRegex = 'conflict literals.* (\d+)';
-    $cpuTimeRegex = 'CPU time.* (\d+\.\d+)';
-
+    $cpuTimeRegex = 'CPU time.* (\d*\.*\d+)';
+    
     $skipped = 0;
     $allProcessed = [];
 
