@@ -1,7 +1,7 @@
 <?php
 
     // Input/output //
-    $options = getopt("d", ['in:','out:']);
+    $options = getopt("ds", ['in:','out:']);
 
     if ( empty($options['in']) || empty($options['out'])) {
         echo "Enter input and output args" . PHP_EOL;
@@ -13,6 +13,12 @@
 
     if ( isset($options['d']) ) {
         $dynamicOnly = true;
+    }
+
+    $enumOut = false;
+
+    if ( isset($options['s']) ) {
+        $enumOut = true;
     }
 
     $fileToParse = $options['in'];
@@ -42,6 +48,26 @@
 
             $matched = preg_match("/$cpuTimeRegex/", $fileToParseArray[$i+1], $match);
             $newInstance['cpuTime'] = $match[1];
+
+            if ( $enumOut ) {
+
+                if ( preg_match ('/(INDETERMINATE|UNSATISFIABLE|SATISFIABLE)/', $fileToParseArray[$i+1], $match) ) {
+
+                    unset($newInstance['cpuTime']);
+
+                    $enumVal = null;
+
+                    if ( $match[1] == "INDETERMINATE" ) {
+                        $enumVal = 0;
+                    } else if ( $match[1] = "UNSATISFIABLE" ) {
+                        $enumVal = 1;
+                    } else {
+                        $enumVal = 2;
+                    }
+
+                    $newInstance['status'] = $enumVal; 
+                }
+            }
 
             $matched = preg_match("/$restartRegex/", $fileToParseArray[$i], $match);
             $newInstance['restarts'] = $match[1];
@@ -80,14 +106,6 @@
             }
 
             //print_r($newInstance); exit;
-
-            // Next index
-            // ============= 
-            /*
-            if ( preg_match ('/(INDETERMINATE|UNSATISFIABLE|SATISFIABLE)/', $fileToParseArray[$i+1], $match) ) {
-                $newInstance['status'] = $match[1]; 
-            }
-            */
         } else {
             $skipped++;
         }
