@@ -55,11 +55,11 @@
 
                     unset($newInstance['cpuTime']);
 
-                    $enumVal = null;
+                    $enumVal = -999999;
 
                     if ( $match[1] == "INDETERMINATE" ) {
                         $enumVal = 0;
-                    } else if ( $match[1] = "UNSATISFIABLE" ) {
+                    } else if ( $match[1] == "UNSATISFIABLE" ) {
                         $enumVal = 1;
                     } else {
                         $enumVal = 2;
